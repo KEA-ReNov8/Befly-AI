@@ -1,14 +1,18 @@
-from pydantic.env_settings import BaseSettings
+from typing import Optional
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROMPT_FILE_PATH: str = "app/prompt/prompt.json"  # 기본값 설정
-    # Azure OpenAI 설정
-    AZURE_OPENAI_API_KEY: str
-    AZURE_OPENAI_ENDPOINT: str
-    AZURE_DEPLOYMENT_NAME: str
+    PROMPT_FILE_PATH: str = "app/prompt/prompt.json"
+    # Azure OpenAI 설정 (선택적)
+    AZURE_OPENAI_API_KEY: Optional[str] = None
+    AZURE_OPENAI_ENDPOINT: Optional[str] = None
+    AZURE_DEPLOYMENT_NAME: Optional[str] = None
+
+    # Google API (필수)
+    GOOGLE_API_KEY: str
     
     # 앱 설정
-    APP_NAME: str = "Befly AI NARE"
+    APP_NAME: str = "Befly_AI_NARE"
     DEBUG: bool = False
 
     class Config:

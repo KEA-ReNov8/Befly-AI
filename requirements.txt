@@ -5,3 +5,5 @@ python-dotenv  # 환경변수 로딩
 uvicorn        # ASGI 서버
 openai         # OpenAI/Azure OpenAI API
 typing-extensions  # typing 지원
+gunicorn
+pydantic-settings
