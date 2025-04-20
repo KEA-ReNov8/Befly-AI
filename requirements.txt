@@ -1,0 +1,7 @@
+fastapi~=0.115.12
+langchain~=0.3.23
+pydantic~=2.11.3
+python-dotenv  # 환경변수 로딩
+uvicorn        # ASGI 서버
+openai         # OpenAI/Azure OpenAI API
+typing-extensions  # typing 지원

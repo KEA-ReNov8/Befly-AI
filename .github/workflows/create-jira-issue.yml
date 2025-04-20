@@ -1,0 +1,140 @@
+name: Create Jira Feat Issue
+on:
+  issues:
+    types: 
+      - opened
+    labels:  # 3가지 label에 대해서 action 진행
+      - feat      
+      - bug
+      - refactor
+jobs:
+  create-feat-issue:
+    name: Create Jira Feat Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Issue Type  # Issue에서 type을 설정
+        id: set_issue_type
+        run: |
+          LABELS_JSON='${{ toJson(github.event.issue.labels) }}'
+          echo "Labels JSON: $LABELS_JSON"
+
+          if echo "$LABELS_JSON" | jq -e '.[] | select(.name=="feat")' > /dev/null; then
+            echo "ISSUETYPE=Dev" >> $GITHUB_ENV
+          elif echo "$LABELS_JSON" | jq -e '.[] | select(.name=="bug")' > /dev/null; then
+            echo "ISSUETYPE=Bug" >> $GITHUB_ENV
+          elif echo "$LABELS_JSON" | jq -e '.[] | select(.name=="refactor")' > /dev/null; then
+            echo "ISSUETYPE=Refactor" >> $GITHUB_ENV
+          else
+            echo "ISSUETYPE=Other" >> $GITHUB_ENV
+          fi
+
+      - name: Check Issue Type (Stop if Other)
+        run: |
+          if [[ "$ISSUETYPE" == "Other" ]]; then
+            echo "Skipping because Issue Type is Other"
+            exit 1  # 실패 처리하여 이후 스텝 실행 중지
+          fi
+
+      - name: Print Issue Type
+        run: echo "Issue Type is $ISSUETYPE"
+
+      - name: Jira Login  # Jira에 로그인
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+
+      - name: Checkout develop code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Set Template Path Based on Issue Type
+        id: set_template_path
+        run: |
+          if [[ "${{ env.ISSUETYPE }}" == "Dev" ]]; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/feature_request.yml" >> $GITHUB_ENV
+          elif [[ "${{ env.ISSUETYPE }}" == "Bug" ]]; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/bug_request.yml" >> $GITHUB_ENV
+          elif [[ "${{ env.ISSUETYPE }}" == "Refactor" ]]; then
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/refactor_request.yml" >> $GITHUB_ENV
+          else
+            echo "TEMPLATE_PATH=.github/ISSUE_TEMPLATE/default_issue.yml" >> $GITHUB_ENV
+          fi
+
+      - name: Issue Parser  
+        uses: stefanbuck/github-issue-praser@v3
+        id: issue-parser
+        with:
+          template-path: ${{env.TEMPLATE_PATH}}
+
+      - name: Log Issue Parser
+        run: |
+          echo '${{ steps.issue-parser.outputs.jsonString }}'
+
+      - name: Convert markdown to Jira Syntax
+        uses: peter-evans/jira2md@v1
+        id: md2jira
+        with:
+          input-text: |
+            ### Github Issue Link
+            - ${{ github.event.issue.html_url }}
+
+            ${{ github.event.issue.body }}
+          mode: md2jira
+
+      - name: Create Issue
+        id: create
+        uses: atlassian/gajira-create@v3
+        with:
+          project: KAN
+          issuetype: "${{ env.ISSUETYPE }}"  # Issue Type 설정
+          summary: "${{ github.event.issue.title }}"
+          description: "${{ steps.md2jira.outputs.output-text }}"
+          fields: |
+            {
+              "parent": {
+                "key": "${{ steps.issue-parser.outputs.issueparser_parentKey }}"
+              }
+            }
+
+      - name: Log created issue
+        run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
+
+      - name: Update issue title
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "update-issue"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
+
+
+  close-jira-issue:
+    if: github.event.action == 'closed'
+    name: Close Jira Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Jira Login
+        uses: atlassian/gajira-login@v3
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+
+      - name: Extract Jira Issue Key
+        id: extract-key
+        run: |
+          TITLE="${{ github.event.issue.title }}"
+          JIRA_ISSUE_KEY=$(echo "$TITLE" | grep -oE '[A-Z]+-[0-9]+' || echo "")
+          echo "Extracted Jira Issue Key: $JIRA_ISSUE_KEY"
+          echo "JIRA_ISSUE_KEY=$JIRA_ISSUE_KEY" >> $GITHUB_ENV
+
+      - name: Transition Jira Issue to Done
+        uses: atlassian/gajira-transition@v2
+        with:
+          issue: ${{ env.JIRA_ISSUE_KEY }}
+          transition: "Done"
+
+          
+        
