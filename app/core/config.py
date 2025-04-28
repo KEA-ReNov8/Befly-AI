@@ -15,6 +15,17 @@ class Settings(BaseSettings):
     APP_NAME: str = "Befly_AI_NARE"
     DEBUG: bool = False
 
+    # MongoDB 설정
+    MONGODB_URL: str
+    MONGODB_DB_NAME: str
+    MONGODB_COLLECTION: str
+
+
+    @property
+    def MONGODB_URL(self) -> str:
+        return f"mongodb://{self.MONGODB_USERNAME}:{self.MONGODB_PASSWORD}@{self.MONGODB_HOST}:{self.MONGODB_PORT}"
+
+
     class Config:
         env_file = ".env"
 

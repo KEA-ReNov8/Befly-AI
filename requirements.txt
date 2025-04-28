@@ -1,5 +1,6 @@
 fastapi~=0.115.12
 langchain~=0.3.23
+langchain-community
 pydantic~=2.11.3
 python-dotenv  # 환경변수 로딩
 uvicorn        # ASGI 서버
@@ -7,3 +8,9 @@ openai         # OpenAI/Azure OpenAI API
 typing-extensions  # typing 지원
 gunicorn
 pydantic-settings
+pymongo
+google-generativeai
+python-json-logger  # 구조화된 로깅
+asyncio            # 비동기 처리
+httpx             # 비동기 HTTP 클라이언트
+motor
