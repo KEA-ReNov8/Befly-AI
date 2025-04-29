@@ -1,11 +1,12 @@
 from typing import Optional, List
 
+from langchain_community.chat_message_histories import MongoDBChatMessageHistory
+
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
 from app.repository.chat_repository import ChatRepository
 from app.utils.session import SessionManager
 from app.core.config import settings
 from app.prompt.prompt import chain_with_history
-from langchain_community.chat_message_histories import MongoDBChatMessageHistory
 
 
 class ChatService:
@@ -18,7 +19,6 @@ class ChatService:
             config=config
         )
         return response
-
 
     @staticmethod
     async def create_new_chat(
@@ -48,7 +48,7 @@ class ChatService:
         return {
             "session_id": session_id,
             "message": "새로운 대화가 시작되었습니다.",
-            "redirect": f"/chat_history/{session_id}"
+            "redirect": f"/chat/history/{session_id}"
         }
 
     @staticmethod
@@ -62,7 +62,22 @@ class ChatService:
             collection_name=settings.MONGODB_COLLECTION,
         )
 
-        return {"messages": [msg.dict() for msg in history.messages]} if history.messages else {"messages": []}
+        if not history.messages:
+            return {"messages": []}
+
+        formatted_messages = []
+        for msg in history.messages:
+            content = getattr(msg, 'content', None)
+            if not content and hasattr(msg, 'data'):
+                content = msg.data.get('content', '')
+
+            formatted_message = {
+                "type": getattr(msg, 'type', 'unknown'),
+                "content": content
+            }
+            formatted_messages.append(formatted_message)
+
+        return {"messages": formatted_messages}
 
     @staticmethod
     async def get_chat_list(user_id: str):
