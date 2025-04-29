@@ -1,6 +1,7 @@
-from langchain_community.chat_message_histories import MongoDBChatMessageHistory
 from typing import Optional, List
 from datetime import datetime
+
+from langchain_community.chat_message_histories import MongoDBChatMessageHistory
 
 
 class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
@@ -27,9 +28,18 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         self.after_keyword = after_keyword or []
         self.before_keyword = before_keyword or []
         self.report = report or {}
+        self.user_id = user_id
+
+    def _session_exists(self) -> bool:
+        """세션 존재 여부 확인"""
+        return self.collection.find_one({"session_id": self.session_id}) is not None
 
     def create_session(self) -> None:
-        """세션 정보를 MongoDB에 저장합니다."""
+        """세션 Document 생성"""
+        if self._session_exists():
+            # 세션이 이미 있으면 만들지 않음
+            return
+
         session_info = {
             "session_id": self.session_id,
             "category": self.category,

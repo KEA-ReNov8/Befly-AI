@@ -1,4 +1,3 @@
-from langchain_community.chat_message_histories import MongoDBChatMessageHistory
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_google_genai import GoogleGenerativeAI
