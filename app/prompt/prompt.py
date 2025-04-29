@@ -17,7 +17,7 @@ prompt = ChatPromptTemplate.from_messages([
               "사용자의 감정, 인지, 행동을 인지행동치료(CBT) 기법에 따라 분석하고 "
               "적절한 질문을 통해 스스로를 돌아보게 유도합니다. "
               "직접적인 판단 없이 공감하며, 문제 해결보다 감정 인식에 집중하세요."),
-    MessagesPlaceholder(variable_name="history"),
+    MessagesPlaceholder(variable_name="History"),
     ("human", "{input}")
 ])
 
@@ -27,12 +27,12 @@ chain = prompt | llm
 # MongoDB 연결된 체인 설정
 chain_with_history = RunnableWithMessageHistory(
     chain,
-    lambda session_id: CustomMongoDBChatMessageHistory(
-        session_id=session_id,
+    lambda sessionId: CustomMongoDBChatMessageHistory(
+        session_id=sessionId,
         connection_string=settings.MONGODB_URL,
         database_name=settings.MONGODB_DB_NAME,
         collection_name=settings.MONGODB_COLLECTION,
     ),
     input_messages_key="input",
-    history_messages_key="history",
+    history_messages_key="History",
 )

@@ -1,7 +1,8 @@
 from typing import Optional, List
+import json
 from datetime import datetime
-
-from langchain_community.chat_message_histories import MongoDBChatMessageHistory
+from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
+from langchain_mongodb import MongoDBChatMessageHistory
 
 
 class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
@@ -15,25 +16,25 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         chat_title: Optional[str] = None,
         after_keyword: Optional[List[str]] = None,
         before_keyword: Optional[List[str]] = None,
-        report: Optional[dict] = None,
-        user_id: Optional[str] = None
+        report: Optional[dict] = None
     ):
         super().__init__(
             session_id=session_id,
             connection_string=connection_string,
             database_name=database_name,
-            collection_name=collection_name
+            collection_name=collection_name,
+            session_id_key="SessionId",
+            history_key="History"
         )
         self.category = category
         self.chat_title = chat_title
         self.after_keyword = after_keyword or []
         self.before_keyword = before_keyword or []
         self.report = report or {}
-        self.user_id = user_id
 
     def _session_exists(self) -> bool:
         """세션 존재 여부 확인"""
-        return self.collection.find_one({"session_id": self.session_id}) is not None
+        return self.collection.find_one({"SessionId": self.session_id}) is not None
 
     def create_session(self) -> None:
         """세션 Document 생성"""
@@ -42,12 +43,47 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
             return
 
         session_info = {
-            "session_id": self.session_id,
+            "SessionId": self.session_id,
             "category": self.category,
             "chat_title": self.chat_title,
             "after_keyword": self.after_keyword,
             "before_keyword": self.before_keyword,
             "report": self.report,
-            "created_at": datetime.now()
+            "created_at": datetime.now(),
+            "History": "[]"
         }
         self.collection.insert_one(session_info)
+
+    def add_message(self, message: BaseMessage) -> None:
+        """메시지 추가"""
+        if not self._session_exists():
+            self.create_session()
+        
+        # 현재 저장된 메시지 가져오기
+        doc = self.collection.find_one({"SessionId": self.session_id})
+        current_messages = json.loads(doc["History"]) if doc.get("History") else []
+        
+        # 새 메시지를 딕셔너리로 변환하여 추가
+        message_dict = message_to_dict(message)
+        current_messages.append(message_dict)
+        
+        # 업데이트
+        self.collection.update_one(
+            {"SessionId": self.session_id},
+            {"$set": {"History": json.dumps(current_messages)}}
+        )
+
+    @property
+    def messages(self) -> List[BaseMessage]:
+        """메시지 목록 조회"""
+        doc = self.collection.find_one({"SessionId": self.session_id})
+        if doc is None or not doc.get("History"):
+            return []
+        
+        try:
+            messages_data = json.loads(doc["History"])
+            if not isinstance(messages_data, list):
+                return []
+            return messages_from_dict(messages_data)
+        except (json.JSONDecodeError, TypeError):
+            return []

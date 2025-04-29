@@ -1,12 +1,10 @@
 from typing import Optional, List
 
-from langchain_community.chat_message_histories import MongoDBChatMessageHistory
-
+from app.core.config import settings
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
+from app.prompt.prompt import chain_with_history
 from app.repository.chat_repository import ChatRepository
 from app.utils.session import SessionManager
-from app.core.config import settings
-from app.prompt.prompt import chain_with_history
 
 
 class ChatService:
@@ -32,16 +30,15 @@ class ChatService:
         session_id = SessionManager.generate_session_id(user_id)
 
         chat_history = CustomMongoDBChatMessageHistory(
-            session_id=session_id,
             connection_string=settings.MONGODB_URL,
             database_name=settings.MONGODB_DB_NAME,
             collection_name=settings.MONGODB_COLLECTION,
             category=category,
+            session_id=session_id,
             chat_title=chat_title,
             after_keyword=after_keyword,
             before_keyword=before_keyword,
             report=report,
-            user_id=user_id
         )
 
         chat_history.create_session()
@@ -56,18 +53,18 @@ class ChatService:
     async def get_chat_history(session_id: str, user_id: str):
         await SessionManager.validate_session(session_id, user_id)
 
-        history = MongoDBChatMessageHistory(
+        History = CustomMongoDBChatMessageHistory(
             session_id=session_id,
             connection_string=settings.MONGODB_URL,
             database_name=settings.MONGODB_DB_NAME,
             collection_name=settings.MONGODB_COLLECTION,
         )
 
-        if not history.messages:
+        if not History.messages:
             return {"messages": []}
 
         formatted_messages = []
-        for msg in history.messages:
+        for msg in History.messages:
             content = getattr(msg, 'content', None)
             if not content and hasattr(msg, 'data'):
                 content = msg.data.get('content', '')
