@@ -40,7 +40,8 @@ class ChatService:
             chat_title=chat_title,
             after_keyword=after_keyword,
             before_keyword=before_keyword,
-            report=report
+            report=report,
+            user_id=user_id
         )
 
         chat_history.create_session()

@@ -15,7 +15,8 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         chat_title: Optional[str] = None,
         after_keyword: Optional[List[str]] = None,
         before_keyword: Optional[List[str]] = None,
-        report: Optional[dict] = None
+        report: Optional[dict] = None,
+        user_id: Optional[str] = None
     ):
         super().__init__(
             session_id=session_id,
