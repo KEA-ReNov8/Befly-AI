@@ -26,7 +26,7 @@ async def new_chat(request: Annotated[ChatStart, Body()]):
 @router.get("/history/{session_id}", response_model=dict)
 async def chat_history(
     session_id: Annotated[str, Path()],
-    user_id: Annotated[str, Header()]
+    user_id: Annotated[str, Header(convert_underscores=False)]
 ):
     return await ChatService.get_chat_history(session_id, user_id)
 
