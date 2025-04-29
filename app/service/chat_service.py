@@ -39,6 +39,7 @@ class ChatService:
             after_keyword=after_keyword,
             before_keyword=before_keyword,
             report=report,
+            user_id=user_id
         )
 
         chat_history.create_session()
@@ -58,6 +59,7 @@ class ChatService:
             connection_string=settings.MONGODB_URL,
             database_name=settings.MONGODB_DB_NAME,
             collection_name=settings.MONGODB_COLLECTION,
+            user_id=user_id
         )
 
         if not History.messages:

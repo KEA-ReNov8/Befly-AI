@@ -16,7 +16,8 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         chat_title: Optional[str] = None,
         after_keyword: Optional[List[str]] = None,
         before_keyword: Optional[List[str]] = None,
-        report: Optional[dict] = None
+        report: Optional[dict] = None,
+        user_id: Optional[str] = None
     ):
         super().__init__(
             session_id=session_id,
@@ -31,6 +32,7 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         self.after_keyword = after_keyword or []
         self.before_keyword = before_keyword or []
         self.report = report or {}
+        self.user_id = user_id
 
     def _session_exists(self) -> bool:
         """세션 존재 여부 확인"""
@@ -44,6 +46,7 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
 
         session_info = {
             "SessionId": self.session_id,
+            "user_id": self.user_id,
             "category": self.category,
             "chat_title": self.chat_title,
             "after_keyword": self.after_keyword,

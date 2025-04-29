@@ -32,6 +32,6 @@ async def chat_history(
 
 @router.get("/list", response_model=list)
 async def chat_list(
-    user_id: Annotated[str, Header()]
+    user_id: Annotated[str, Header(convert_underscores=False)]
 ):
     return await ChatService.get_chat_list(user_id)
