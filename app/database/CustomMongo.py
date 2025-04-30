@@ -4,6 +4,8 @@ from datetime import datetime
 from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
 from langchain_mongodb import MongoDBChatMessageHistory
 
+from app.core.exceptions import CustomException
+
 
 class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
     def __init__(
@@ -24,8 +26,8 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
             connection_string=connection_string,
             database_name=database_name,
             collection_name=collection_name,
-            session_id_key="SessionId",
-            history_key="History"
+            session_id_key="session_id",
+            history_key="history"
         )
         self.category = category
         self.chat_title = chat_title
@@ -36,7 +38,7 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
 
     def _session_exists(self) -> bool:
         """세션 존재 여부 확인"""
-        return self.collection.find_one({"SessionId": self.session_id}) is not None
+        return self.collection.find_one({"session_id": self.session_id}) is not None
 
     def create_session(self) -> None:
         """세션 Document 생성"""
@@ -45,7 +47,7 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
             return
 
         session_info = {
-            "SessionId": self.session_id,
+            "session_id": self.session_id,
             "user_id": self.user_id,
             "category": self.category,
             "chat_title": self.chat_title,
@@ -53,18 +55,18 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
             "before_keyword": self.before_keyword,
             "report": self.report,
             "created_at": datetime.now(),
-            "History": "[]"
+            "history": "[]"
         }
         self.collection.insert_one(session_info)
 
     def add_message(self, message: BaseMessage) -> None:
         """메시지 추가"""
         if not self._session_exists():
-            self.create_session()
+            raise CustomException(403,"INVALID_SESSION", "존재하지 않는 세션입니다.")
         
         # 현재 저장된 메시지 가져오기
-        doc = self.collection.find_one({"SessionId": self.session_id})
-        current_messages = json.loads(doc["History"]) if doc.get("History") else []
+        doc = self.collection.find_one({"session_id": self.session_id})
+        current_messages = json.loads(doc["history"]) if doc.get("history") else []
         
         # 새 메시지를 딕셔너리로 변환하여 추가
         message_dict = message_to_dict(message)
@@ -72,19 +74,19 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         
         # 업데이트
         self.collection.update_one(
-            {"SessionId": self.session_id},
-            {"$set": {"History": json.dumps(current_messages)}}
+            {"session_id": self.session_id},
+            {"$set": {"history": json.dumps(current_messages)}}
         )
 
     @property
     def messages(self) -> List[BaseMessage]:
         """메시지 목록 조회"""
-        doc = self.collection.find_one({"SessionId": self.session_id})
-        if doc is None or not doc.get("History"):
+        doc = self.collection.find_one({"session_id": self.session_id})
+        if doc is None or not doc.get("history"):
             return []
         
         try:
-            messages_data = json.loads(doc["History"])
+            messages_data = json.loads(doc["history"])
             if not isinstance(messages_data, list):
                 return []
             return messages_from_dict(messages_data)
