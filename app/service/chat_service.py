@@ -2,7 +2,8 @@ from typing import Optional, List
 
 from app.core.config import settings
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
-from app.prompt.prompt import chain_with_history
+from app.prompt.lang_chain import chain_with_history
+from app.prompt.lang_chain import evaluation_with_history
 from app.repository.chat_repository import ChatRepository
 from app.utils.session import SessionManager
 
@@ -95,3 +96,15 @@ class ChatService:
                 })
 
         return chat_list
+
+    @staticmethod
+    async def evaluate_user(session_id:str, user_id:str):
+        await SessionManager.validate_session(session_id, user_id)
+
+        await SessionManager.validate_session(session_id, user_id)
+        config = {"configurable": {"session_id": session_id}}
+        response = await evaluation_with_history.ainvoke(
+            {"input": "사용자 평가를 시작합니다."},
+            config=config,
+        )
+        return response
