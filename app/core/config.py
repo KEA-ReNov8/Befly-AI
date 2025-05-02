@@ -2,7 +2,6 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    PROMPT_FILE_PATH: str = "app/prompt/prompt.json"
     # Azure OpenAI 설정 (선택적)
     AZURE_OPENAI_API_KEY: Optional[str] = None
     AZURE_OPENAI_ENDPOINT: Optional[str] = None
