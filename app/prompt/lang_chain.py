@@ -23,7 +23,7 @@ evaluation_with_history = RunnableWithMessageHistory(
         collection_name=settings.MONGODB_COLLECTION,
     ),
     input_messages_key="input",
-    history_messages_key="History",
+    history_messages_key="history",
 )
 
 # 기본 상담 체인 설정
@@ -39,5 +39,5 @@ chain_with_history = RunnableWithMessageHistory(
         collection_name=settings.MONGODB_COLLECTION,
     ),
     input_messages_key="input",
-    history_messages_key="History",
+    history_messages_key="history",
 )

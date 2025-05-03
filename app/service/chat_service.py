@@ -1,6 +1,9 @@
 from typing import Optional, List
 
+from exceptiongroup import catch
+
 from app.core.config import settings
+from app.core.exceptions import CustomException
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
 from app.prompt.lang_chain import chain_with_history
 from app.prompt.lang_chain import evaluation_with_history
@@ -55,7 +58,7 @@ class ChatService:
     async def get_chat_history(session_id: str, user_id: str):
         await SessionManager.validate_session(session_id, user_id)
 
-        History = CustomMongoDBChatMessageHistory(
+        history = CustomMongoDBChatMessageHistory(
             session_id=session_id,
             connection_string=settings.MONGODB_URL,
             database_name=settings.MONGODB_DB_NAME,
@@ -63,11 +66,11 @@ class ChatService:
             user_id=user_id
         )
 
-        if not History.messages:
+        if not history.messages:
             return {"messages": []}
 
         formatted_messages = []
-        for msg in History.messages:
+        for msg in history.messages:
             content = getattr(msg, 'content', None)
             if not content and hasattr(msg, 'data'):
                 content = msg.data.get('content', '')
@@ -92,7 +95,8 @@ class ChatService:
                     "session_id": session_id,
                     "chat_title": info.get("chat_title", "Untitled"),
                     "created_at": info.get("created_at"),
-                    "last_message": info.get("content", "")
+                    "last_message": info.get("content", ""),
+                    "category": info.get("category", "")
                 })
 
         return chat_list
@@ -100,11 +104,39 @@ class ChatService:
     @staticmethod
     async def evaluate_user(session_id:str, user_id:str):
         await SessionManager.validate_session(session_id, user_id)
-
-        await SessionManager.validate_session(session_id, user_id)
         config = {"configurable": {"session_id": session_id}}
         response = await evaluation_with_history.ainvoke(
             {"input": "사용자 평가를 시작합니다."},
             config=config,
         )
-        return response
+        return parse_json_block(response)
+
+
+    @staticmethod
+    async def delete_chat(session_id: str, user_id: str):
+        await SessionManager.validate_session(session_id, user_id)
+        try:
+            history = CustomMongoDBChatMessageHistory(
+                session_id=session_id,
+                connection_string=settings.MONGODB_URL,
+                database_name=settings.MONGODB_DB_NAME,
+                collection_name=settings.MONGODB_COLLECTION,
+            )
+            history.clear()
+        except Exception as e:
+            raise CustomException()
+
+
+
+
+
+
+
+
+def parse_json_block(response_text: str) -> dict:
+    import json
+    clean = response_text.replace("```json\n", "").replace("\n```", "")
+    if not clean:
+        raise ValueError("응답에서 JSON 블록을 찾을 수 없습니다.")
+
+    return json.loads(clean)

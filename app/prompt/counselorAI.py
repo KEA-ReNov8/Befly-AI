@@ -19,6 +19,6 @@ counselor_prompt = ChatPromptTemplate.from_messages([
 4. 안전과 위기관리
    - 위험 신호(자해, 자살 등)를 주의 깊게 살피세요
    - 필요한 경우 전문가 상담을 권유하세요"""),
-    MessagesPlaceholder(variable_name="History"),
+    MessagesPlaceholder(variable_name="history"),
     ("human", "{input}")
 ])

@@ -44,3 +44,11 @@ async def evaluate_user(
     user_id: Annotated[str, Header()]
 ):
     return await ChatService.evaluate_user(session_id, user_id)
+
+@router.delete("/{session_id}")
+async def delete_session(
+    session_id: Annotated[str, Path()],
+    user_id: Annotated[str, Header()]
+
+):
+    return await ChatService.delete_chat(session_id, user_id)

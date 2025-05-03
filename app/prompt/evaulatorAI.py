@@ -33,6 +33,6 @@ evaluation_prompt = ChatPromptTemplate.from_messages([
 
 """
     ),
-    MessagesPlaceholder(variable_name="History"),
+    MessagesPlaceholder(variable_name="history"),
     ("human", "위 사용자 대화를 평가해 주세요.")
 ])
