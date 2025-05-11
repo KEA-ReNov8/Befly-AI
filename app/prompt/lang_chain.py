@@ -8,7 +8,7 @@ from app.prompt.evaulatorAI import evaluation_prompt
 
 # LLM 설정
 llm = GoogleGenerativeAI(
-    model="gemini-1.5-pro",
+    model="gemini-2.0-flash",
     google_api_key=settings.GOOGLE_API_KEY
 )
 evaluation_chain = evaluation_prompt | llm
