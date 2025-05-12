@@ -1,11 +1,10 @@
 from typing import Optional, List
 
-from exceptiongroup import catch
-
 from app.core.config import settings
 from app.core.exceptions import CustomException
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
 from app.prompt.counselorAI import chain_with_history
+from app.prompt.evaulatorAI import evaluation_with_history
 from app.repository.chat_repository import ChatRepository
 from app.utils.session import SessionManager
 
