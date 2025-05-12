@@ -1,4 +1,9 @@
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables import RunnableWithMessageHistory
+from langchain_google_genai import GoogleGenerativeAI
+
+from app.core.config import settings
+from app.database.CustomMongo import CustomMongoDBChatMessageHistory
 
 evaluation_prompt = ChatPromptTemplate.from_messages([
     (
@@ -36,3 +41,23 @@ evaluation_prompt = ChatPromptTemplate.from_messages([
     MessagesPlaceholder(variable_name="history"),
     ("human", "위 사용자 대화를 평가해 주세요.")
 ])
+
+llm = GoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    google_api_key=settings.GOOGLE_API_KEY
+)
+evaluation_chain = evaluation_prompt | llm
+
+# 기본 평가 체인
+evaluation_with_history = RunnableWithMessageHistory(
+    evaluation_chain,
+    lambda sessionId: CustomMongoDBChatMessageHistory(
+        session_id=sessionId,
+        connection_string=settings.MONGODB_URL,
+        database_name=settings.MONGODB_DB_NAME,
+        collection_name=settings.MONGODB_COLLECTION,
+    ),
+    input_messages_key="input",
+    history_messages_key="history",
+)
+
