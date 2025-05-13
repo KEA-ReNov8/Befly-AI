@@ -17,7 +17,6 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         category: Optional[str] = None,
         chat_title: Optional[str] = None,
         after_keyword: Optional[List[str]] = None,
-        before_keyword: Optional[List[str]] = None,
         report: Optional[dict] = None,
         user_id: Optional[str] = None
     ):
@@ -32,7 +31,6 @@ class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
         self.category = category
         self.chat_title = chat_title
         self.after_keyword = after_keyword or []
-        self.before_keyword = before_keyword or []
         self.report = report or {}
         self.user_id = user_id
 

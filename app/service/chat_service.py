@@ -1,8 +1,12 @@
 from typing import Optional, List
 
+from fastapi import Response, status
+from starlette.responses import JSONResponse
+
 from app.core.config import settings
 from app.core.exceptions import CustomException
 from app.database.CustomMongo import CustomMongoDBChatMessageHistory
+from app.database.MongoDB import get_db
 from app.prompt.counselorAI import chain_with_history
 from app.prompt.evaulatorAI import evaluation_with_history
 from app.repository.chat_repository import ChatRepository
@@ -39,7 +43,6 @@ class ChatService:
             session_id=session_id,
             chat_title=chat_title,
             after_keyword=after_keyword,
-            before_keyword=before_keyword,
             report=report,
             user_id=user_id
         )
@@ -107,11 +110,13 @@ class ChatService:
             {"input": "사용자 평가를 시작합니다."},
             config=config,
         )
-        return parse_json_block(response)
-
+        block = parse_json_block(response)
+        result = await update_after_keyword(session_id, block)
+        if result:
+            return block
 
     @staticmethod
-    async def delete_chat(session_id: str, user_id: str):
+    async def delete_chat(session_id: str, user_id: str, response:Response):
         await SessionManager.validate_session(session_id, user_id)
         try:
             history = CustomMongoDBChatMessageHistory(
@@ -121,8 +126,13 @@ class ChatService:
                 collection_name=settings.MONGODB_COLLECTION,
             )
             history.clear()
+            return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "채팅 기록이 성공적으로 삭제되었습니다.",
+                     "CODE": "COMMON200"}
+        )
         except Exception as e:
-            raise CustomException()
+            raise CustomException(500, "CHAT002", "서버 내부 오류입니다.")
 
 
 
@@ -138,3 +148,26 @@ def parse_json_block(response_text: str) -> dict:
         raise ValueError("응답에서 JSON 블록을 찾을 수 없습니다.")
 
     return json.loads(clean)
+
+
+async def update_after_keyword(session_id: str, emotion_data: dict):
+    try:
+        keywords_to_add = []
+        for emotion, data in emotion_data.items():
+            keyword_entry = {
+                "keyword": emotion,
+                "score": data["score"],
+                "comment": data["comment"]
+            }
+            keywords_to_add.append(keyword_entry)
+
+        db = get_db()
+        collection = db[settings.MONGODB_COLLECTION]
+        query = {"session_id": session_id}
+        update = {"$push": {"after_keyword": {"$each": keywords_to_add}}}
+        collection.insert_one(query, update)
+        return "OK"
+    except Exception as e:
+        print(f"Error updating after_keyword: {e}")
+        raise CustomException(500, "CHAT002", "채팅 세션이 존재하지 않습니다. 서버 관리자에게 문의하세요.")
+

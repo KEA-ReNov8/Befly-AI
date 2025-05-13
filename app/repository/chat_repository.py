@@ -14,4 +14,3 @@ class ChatRepository:
             {"session_id": session_id},
             sort=[("created_at", -1)]
         )
-''
