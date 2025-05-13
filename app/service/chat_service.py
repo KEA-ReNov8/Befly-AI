@@ -30,7 +30,6 @@ class ChatService:
             chat_title: str,
             category: str,
             after_keyword: Optional[List[str]] = None,
-            before_keyword: Optional[List[str]] = None,
             report: Optional[dict] = None
     ):
         session_id = SessionManager.generate_session_id(user_id)
@@ -44,7 +43,7 @@ class ChatService:
             chat_title=chat_title,
             after_keyword=after_keyword,
             report=report,
-            user_id=user_id
+            user_id=user_id,
         )
 
         chat_history.create_session()
@@ -103,20 +102,27 @@ class ChatService:
         return chat_list
 
     @staticmethod
-    async def evaluate_user(session_id:str, user_id:str):
-        await SessionManager.validate_session(session_id, user_id)
-        config = {"configurable": {"session_id": session_id}}
-        response = await evaluation_with_history.ainvoke(
-            {"input": "사용자 평가를 시작합니다."},
-            config=config,
-        )
-        block = parse_json_block(response)
-        result = await update_after_keyword(session_id, block)
-        if result:
-            return block
+    async def evaluate_user(session_id: str, user_id: str):
+        try:
+            await SessionManager.validate_session(session_id, user_id)
+            config = {"configurable": {"session_id": session_id}}
+            response = await evaluation_with_history.ainvoke(
+                {"input": "사용자 평가를 시작합니다."},
+                config=config,
+            )
+            try:
+                block = parse_json_block(response)
+                result = await update_after_keyword_and_change_status(session_id, block)
+                if result == "OK":
+                    return block
+                return None
+            except ValueError as e:
+                raise CustomException(400, "CHAT003", f"AI 응답에서 JSON 파싱 오류가 발생했습니다: {e}")
+        except CustomException as e:
+            raise e
 
     @staticmethod
-    async def delete_chat(session_id: str, user_id: str, response:Response):
+    async def delete_chat(session_id: str, user_id: str):
         await SessionManager.validate_session(session_id, user_id)
         try:
             history = CustomMongoDBChatMessageHistory(
@@ -150,7 +156,7 @@ def parse_json_block(response_text: str) -> dict:
     return json.loads(clean)
 
 
-async def update_after_keyword(session_id: str, emotion_data: dict):
+async def update_after_keyword_and_change_status(session_id: str, emotion_data: dict):
     try:
         keywords_to_add = []
         for emotion, data in emotion_data.items():
@@ -164,10 +170,10 @@ async def update_after_keyword(session_id: str, emotion_data: dict):
         db = get_db()
         collection = db[settings.MONGODB_COLLECTION]
         query = {"session_id": session_id}
-        update = {"$push": {"after_keyword": {"$each": keywords_to_add}}}
-        collection.insert_one(query, update)
-        return "OK"
+        update = {"$push": {"after_keyword": {"$each": keywords_to_add}}, "$set": {"worry_state": False}}
+        result = await collection.update_one(query, update)
+        if result.modified_count > 0 or result.upserted_id is not None:
+            return "OK"
+        return None
     except Exception as e:
-        print(f"Error updating after_keyword: {e}")
-        raise CustomException(500, "CHAT002", "채팅 세션이 존재하지 않습니다. 서버 관리자에게 문의하세요.")
-
+        raise CustomException(500, "CHAT002", "채팅 세션 업데이트 중 오류가 발생했습니다.")
