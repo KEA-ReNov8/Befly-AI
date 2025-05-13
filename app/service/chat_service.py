@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.exceptions import CustomException
-from app.database.CustomMongo import CustomMongoDBChatMessageHistory
+from app.database.CustomMongoChat import CustomMongoDBChatMessageHistory
 from app.database.MongoDB import get_db
 from app.prompt.counselorAI import chain_with_history
 from app.prompt.evaulatorAI import evaluation_with_history

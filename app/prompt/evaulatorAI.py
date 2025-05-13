@@ -3,7 +3,7 @@ from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_google_genai import GoogleGenerativeAI
 
 from app.core.config import settings
-from app.database.CustomMongo import CustomMongoDBChatMessageHistory
+from app.database.CustomMongoChat import CustomMongoDBChatMessageHistory
 
 evaluation_prompt = ChatPromptTemplate.from_messages([
     (

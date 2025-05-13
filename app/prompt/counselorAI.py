@@ -4,7 +4,7 @@ from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_google_genai import GoogleGenerativeAI
 
 from app.core.config import settings
-from app.database.CustomMongo import CustomMongoDBChatMessageHistory
+from app.database.CustomMongoChat import CustomMongoDBChatMessageHistory
 
 counselor_prompt = ChatPromptTemplate.from_messages([
     ("system", """당신은 전문 심리상담 챗봇 '나래'입니다. 사용자의 마음을 깊이 이해하고 지지하며, 다음과 같은 원칙과 구조에 따라 상담을 진행합니다:
