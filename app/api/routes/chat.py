@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Body, Header, Path
 from typing import Annotated
-from app.models.chat import ChatMessage, ChatStart
+from app.models.chat import ChatMessage, ChatStart, UserId
 from app.models.base import CommonResponse
 from app.service.chat_service import ChatService
 
@@ -25,30 +25,30 @@ async def new_chat(request: Annotated[ChatStart, Body()]):
 
 @router.get("/history/{session_id}", response_model=dict)
 async def chat_history(
+    request: Annotated[UserId, Header()],
     session_id: Annotated[str, Path()],
-    user_id: Annotated[str, Header()]
 ):
-    return await ChatService.get_chat_history(session_id, user_id)
+    return await ChatService.get_chat_history(session_id, request.user_id)
 
 
 @router.get("/list", response_model=list)
 async def chat_list(
-    user_id: Annotated[str, Header()]
+    request: Annotated[UserId, Header()],
 ):
-    return await ChatService.get_chat_list(user_id)
+    return await ChatService.get_chat_list(request.user_id)
 
 
 @router.get("/evaluate/{session_id}")
 async def evaluate_user(
     session_id: Annotated[str, Path()],
-    user_id: Annotated[str, Header()]
+    request: Annotated[UserId, Header()],
 ):
-    return await ChatService.evaluate_user(session_id, user_id)
+    return await ChatService.evaluate_user(session_id, request.user_id)
 
 @router.delete("/{session_id}")
 async def delete_session(
     session_id: Annotated[str, Path()],
-    user_id: Annotated[str, Header()]
+    request: Annotated[UserId, Header()],
 
 ):
-    return await ChatService.delete_chat(session_id, user_id)
+    return await ChatService.delete_chat(session_id, request.user_id)
