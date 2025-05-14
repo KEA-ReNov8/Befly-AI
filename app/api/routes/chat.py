@@ -4,7 +4,7 @@ from app.models.chat import ChatMessage, ChatStart, UserId
 from app.models.base import CommonResponse
 from app.service.chat_service import ChatService
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+router = APIRouter(prefix="/consult/chat", tags=["Chat"])
 
 @router.post("/", response_model=CommonResponse)
 async def chat(message: Annotated[ChatMessage, Body()]):
