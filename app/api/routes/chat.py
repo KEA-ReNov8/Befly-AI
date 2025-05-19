@@ -1,36 +1,33 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Header, Path, Request
+from fastapi import APIRouter, Body, Path, Request
 
 from app.models.base import CommonResponse
+from app.models.chat import ChatMessage, ChatStart
 from app.service.chat_service import ChatService
-from typing import Dict
-
 
 router = APIRouter(prefix="/consult/chat", tags=["Chat"])
 
 
 @router.post("/", response_model=CommonResponse)
-async def chat(request: Request):
+async def chat(request: Request, message: Annotated[ChatMessage, Body()]):
     headers = request.headers
-    body_data: Dict = await request.json()
 
     response = await ChatService.process_chat(
-        message_content=body_data.get("content"),
-        session_id=body_data.get("session_id"),
+        message_content=message.content,
+        session_id=message.session_id,
         user_id=headers.get("X-USER-ID")
     )
     return CommonResponse(message=response)
 
 @router.post("/new", response_model=dict)
-async def new_chat(request: Request):
+async def new_chat(request: Request, start: Annotated[ChatStart, Body()]):
     headers = request.headers
-    body_data: Dict = await request.json()
 
     return await ChatService.create_new_chat(
         user_id=headers.get("X-USER-ID"),
-        chat_title=body_data.get("chat_title"),
-        category=body_data.get("category"),
+        chat_title=start.chat_title,
+        category=start.worry_category
     )
 
 @router.get("/history/{session_id}", response_model=dict)

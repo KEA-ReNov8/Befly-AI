@@ -7,13 +7,10 @@ from app.core.handlers import setup_exception_handlers
 
 
 bearer_header = APIKeyHeader(name="Authorization", auto_error=False, description="액세스 토큰 (Bearer 형식)")
-refresh_token_header = APIKeyHeader(name="X-Refresh-Token", auto_error=False, description="리프레시 토큰 (Bearer 형식)")
-
 app = FastAPI(
     title=settings.APP_NAME,
     dependencies=[
-        Depends(bearer_header),
-        Depends(refresh_token_header)
+        Depends(bearer_header)
     ]
 )
 
