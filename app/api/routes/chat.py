@@ -40,12 +40,14 @@ async def chat_history(
     return await ChatService.get_chat_history(session_id, user_id)
 
 
-@router.get("/list", response_model=list)
+@router.get("/list/{status_field}", response_model=list)
 async def chat_list(
-        request: Request
+        request: Request,
+        status_field: Annotated[bool, Path()]
+
 ):
     user_id = request.headers.get("X-USER-ID")
-    return await ChatService.get_chat_list(user_id)
+    return await ChatService.get_chat_list(user_id, status_field)
 
 
 @router.get("/evaluate/{session_id}")

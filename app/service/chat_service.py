@@ -1,6 +1,7 @@
+import json
 from typing import Optional, List
 
-from fastapi import Response, status
+from fastapi import status
 from starlette.responses import JSONResponse
 
 from app.core.config import settings
@@ -84,19 +85,23 @@ class ChatService:
         return {"messages": formatted_messages}
 
     @staticmethod
-    async def get_chat_list(user_id: str):
-        sessions = await ChatRepository.find_sessions_by_user(user_id)
+    async def get_chat_list(user_id: str, status_field: bool):
+        print(f"유저 아이디:{user_id}")
+        sessions = await ChatRepository.find_sessions_by_user(user_id, status_field)
+        print("세션:")
+        print(sessions)
         chat_list = []
 
         for session_id in sessions:
-            info = await ChatRepository.find_session_info(session_id)
+            info = await ChatRepository.find_session_info(session_id, status_field)
             if info:
                 chat_list.append({
                     "session_id": session_id,
                     "chat_title": info.get("chat_title", "Untitled"),
                     "created_at": info.get("created_at"),
                     "last_message": info.get("content", ""),
-                    "category": info.get("category", "")
+                    "category": info.get("category", ""),
+                    "status": info.get("worry_state")
                 })
 
         return chat_list
@@ -114,7 +119,13 @@ class ChatService:
                 block = parse_json_block(response)
                 result = await update_after_keyword_and_change_status(session_id, block)
                 if result == "OK":
-                    return block
+                    user_info = await ChatRepository.find_session_info(session_id, False)
+                    if user_info:  # userInfo가 None이 아닌 경우에만 접근
+                        block["worry_title"] = user_info.get("chat_title")
+                        block["worry_category"] = user_info.get("category")
+                        block["worry_created_at"] = user_info.get("created_at")
+                        return block
+                    return None  # userInfo가 None인 경우 명시적으로 None 반환
                 return None
             except ValueError as e:
                 raise CustomException(400, "CHAT003", f"AI 응답에서 JSON 파싱 오류가 발생했습니다: {e}")
@@ -156,14 +167,16 @@ def parse_json_block(response_text: str) -> dict:
     return json.loads(clean)
 
 
-async def update_after_keyword_and_change_status(session_id: str, emotion_data: dict):
+async def update_after_keyword_and_change_status(session_id: str, data_dict: dict):
     try:
+        analytics_data = data_dict.get('analytics', [])
+
         keywords_to_add = []
-        for emotion, data in emotion_data.items():
+        for item in analytics_data:
             keyword_entry = {
-                "keyword": emotion,
-                "score": data["score"],
-                "comment": data["comment"]
+                "emotion": item.get('emotion'),
+                "score": item.get('score'),
+                "comment": item.get('comment')
             }
             keywords_to_add.append(keyword_entry)
 
@@ -176,4 +189,5 @@ async def update_after_keyword_and_change_status(session_id: str, emotion_data: 
             return "OK"
         return None
     except Exception as e:
+        print(e)
         raise CustomException(500, "CHAT002", "채팅 세션 업데이트 중 오류가 발생했습니다.")
