@@ -8,15 +8,15 @@
 <img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | 
 |:-----:|:-----:|:-----:|:-----:|
 |[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|
-|팀장 👨🏻‍💻|팀원 👨🏻‍💻|팀원 👨🏻‍💻|팀원 👨🏻‍💻|
-|화이팅!|화이팅!!|화이팅!!!|화이팅!!!!|
-|``<br/>하림|``<br/>|``<br/>|``<br/>|
+|팀장 👨🏻‍💻|
+|외롭다|
+|하림|
 
 </div>
 <br/>
 
 ## 🛠️ Development Environment 🛠️
-![intellij](https://img.shields.io/badge/intellij-000000?style=for-the-badge&logo=intellijidea&logoColor=white)
+![pycharm](https://img.shields.io/badge/intellij-000000?style=for-the-badge&logo=intellijidea&logoColor=white)
 ![aws](https://img.shields.io/badge/aws-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white)
 
 ## 🥞 Stacks 🥞
