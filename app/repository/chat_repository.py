@@ -17,9 +17,9 @@ class ChatRepository:
     async def find_session_info(session_id: str, status_field: Optional[bool] = None):
         db = get_db()
         query = {"session_id": session_id}
-        if status_field is None or status_field == "":
-            query["worry_state"] = False
-        else:
+
+        # status_field가 None이 아니고 빈 문자열이 아닐 때만 worry_state 조건을 추가합니다.
+        if status_field is not None and status_field != "":
             query["worry_state"] = status_field
 
         return await db[settings.MONGODB_COLLECTION].find_one(
