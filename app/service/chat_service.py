@@ -133,8 +133,8 @@ class ChatService:
             raise e
 
     @staticmethod
-    async def delete_chat(session_id: str, user_id: str):
-        await SessionManager.validate_session(session_id, user_id)
+    async def delete_chat(session_id: str, user_id: str, status: bool):
+        await SessionManager.validate_session(session_id, user_id, status)
         try:
             history = CustomMongoDBChatMessageHistory(
                 session_id=session_id,
@@ -143,11 +143,7 @@ class ChatService:
                 collection_name=settings.MONGODB_COLLECTION,
             )
             history.clear()
-            return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"message": "채팅 기록이 성공적으로 삭제되었습니다.",
-                     "CODE": "COMMON200"}
-        )
+            return True
         except Exception as e:
             raise CustomException(500, "CHAT002", "서버 내부 오류입니다.")
 

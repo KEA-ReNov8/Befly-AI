@@ -83,16 +83,15 @@ async def evaluate_user(
         message="평가가 완료되었습니다.",
         result = model
     )
-@router.delete("/{session_id}", response_model=ResponseModel)
+@router.delete("/{status_field}/{session_id}/", response_model=ResponseModel)
 async def delete_session(
     session_id: Annotated[str, Path()],
+    status_field: Annotated[bool, Path()],
     request: Request
 ):
     user_id = request.headers.get("X-USER-ID")
-    model = await ChatService.delete_chat(session_id, user_id)
-
-    return ResponseModel(
-        code="COMMON200",
-        message="채팅이 삭제되었습니다.",
-        result = model
-    )
+    if(await ChatService.delete_chat(session_id, user_id, status_field)):
+        return ResponseModel(
+            code="COMMON200",
+            message="채팅이 삭제되었습니다."
+        )

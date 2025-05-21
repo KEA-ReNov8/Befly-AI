@@ -18,7 +18,7 @@ class ChatRepository:
         db = get_db()
         query = {"session_id": session_id}
         if status_field is None or status_field == "":
-            query["worry_state"] = True
+            query["worry_state"] = False
         else:
             query["worry_state"] = status_field
 

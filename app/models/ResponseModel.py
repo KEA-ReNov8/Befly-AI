@@ -6,4 +6,4 @@ class ResponseModel(BaseModel):
     time: datetime.datetime = datetime.datetime.now()
     code: str
     message: str
-    result: Any
+    result: Any = None
