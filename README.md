@@ -22,7 +22,7 @@
 ## 🥞 Stacks 🥞
 | Name          | Description   |
 | ------------  |---------- |
-| <img src="[[https://img.shields.io/badge/-Springboot-6DB33F?style=flat&logo=springboot&logoColor=white](https://img.shields.io/badge/pycharm-000000?style=for-the-badge&logo=pycharm&logoColor=#white) ---](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)"> | Python 기반 서버 프로그래밍을 할 수 있는 프레임워크.|
+| <img src="https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi"> | Python 기반 서버 프로그래밍을 할 수 있는 프레임워크.|
 | <img src="https://img.shields.io/badge/-Git-F05032?style=flat&logo=git&logoColor=white"> | 분산 버전 관리 시스템으로, 코드 히스토리 관리와 협업을 효율적으로 지원한다.|
 | <img src="https://img.shields.io/badge/-Notion-000000?style=flat&logo=notion&logoColor=white"> | 작업 관리 및 문서화를 위한 통합 협업 도구.|
 
