@@ -1,17 +1,16 @@
 <div align=center>
 
-# ReNov8-BE
+# ReNov8-AI
 
-### KEA 6th - ReNov8 백엔드 레포지토리
-#### [노션 링크](https://www.notion.so/Team-Space-1b3ea3db585680a5aa1fd8f6b5aaa9fb)
+### KEA 6th - ReNov8 AI 레포지토리
 
-## BE Members
+## AI Member
 <img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | 
 |:-----:|:-----:|:-----:|:-----:|
 |[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|
 |팀장 👨🏻‍💻|팀원 👨🏻‍💻|팀원 👨🏻‍💻|팀원 👨🏻‍💻|
 |화이팅!|화이팅!!|화이팅!!!|화이팅!!!!|
-|``<br/>|``<br/>|``<br/>|``<br/>|
+|``<br/>하림|``<br/>|``<br/>|``<br/>|
 
 </div>
 <br/>
