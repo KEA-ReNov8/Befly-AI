@@ -5,9 +5,9 @@
 ### KEA 6th - ReNov8 AI 레포지토리
 
 ## AI Member
-<img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | <img width="160px" src=""/> | 
-|:-----:|:-----:|:-----:|:-----:|
-|[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|[](https://github.com/)|
+<img width="160px" src=""/> |
+|:-----:|
+|[](https://github.com/)|
 |팀장 👨🏻‍💻|
 |외롭다|
 |하림|
