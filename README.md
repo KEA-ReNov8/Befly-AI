@@ -16,8 +16,7 @@
 <br/>
 
 ## 🛠️ Development Environment 🛠️
-![pycharm](https://img.shields.io/badge/intellij-000000?style=for-the-badge&logo=intellijidea&logoColor=white)
-![aws](https://img.shields.io/badge/aws-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white)
+![pycharm](https://img.shields.io/badge/pycharm-143?style=for-the-badge&logo=pycharm&logoColor=black&color=black&labelColor=green)
 
 ## 🥞 Stacks 🥞
 | Name          | Description   |
