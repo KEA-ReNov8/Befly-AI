@@ -1,7 +1,7 @@
 import uuid
 from typing import Optional
 
-from app.core.exceptions import CustomException
+from app.Exception.exceptions import CustomException
 from app.repository.chat_repository import ChatRepository
 
 

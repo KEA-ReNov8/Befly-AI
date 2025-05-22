@@ -1,11 +1,7 @@
-import json
 from typing import Optional, List
 
-from fastapi import status
-from starlette.responses import JSONResponse
-
 from app.core.config import settings
-from app.core.exceptions import CustomException
+from app.Exception.exceptions import CustomException
 from app.database.CustomMongoChat import CustomMongoDBChatMessageHistory
 from app.database.MongoDB import get_db
 from app.prompt.counselorAI import chain_with_history

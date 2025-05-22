@@ -4,7 +4,7 @@ from datetime import datetime
 from langchain_core.messages import BaseMessage, message_to_dict, messages_from_dict
 from langchain_mongodb import MongoDBChatMessageHistory
 
-from app.core.exceptions import CustomException
+from app.Exception.exceptions import CustomException
 
 
 class CustomMongoDBChatMessageHistory(MongoDBChatMessageHistory):
