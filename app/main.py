@@ -3,7 +3,7 @@ from fastapi.security import APIKeyHeader
 
 from app.api.routes.chat import router as chat_router
 from app.core.config import settings
-from app.core.handlers import setup_exception_handlers
+from app.Exception.handlers import setup_exception_handlers
 
 
 bearer_header = APIKeyHeader(name="Authorization", auto_error=False, description="액세스 토큰 (Bearer 형식)")
