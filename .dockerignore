@@ -47,7 +47,7 @@ vector_store/
 .docker/
 docker-compose.override.yml
 docker-compose.*.yml
-!DockerFile
+!Dockerfile
 .dockerignore
 
 # Docker 볼륨 및 데이터

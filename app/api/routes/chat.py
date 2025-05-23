@@ -1,4 +1,3 @@
-from tkinter.scrolledtext import example
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Path, Request
