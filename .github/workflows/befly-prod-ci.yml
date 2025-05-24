@@ -1,4 +1,4 @@
-name: 🐍Befly AI App CI
+name: 🐍Befly AI Production CI
 
 on:
   pull_request:
