@@ -35,3 +35,22 @@ jobs:
       - name: Push to Docker Hub
         run: |
           docker push ${{ secrets.DOCKER_USERNAME }}/befly-ai:${{ steps.vars.outputs.sha }}
+
+      - name: Checkout Manifests Repo
+        uses: actions/checkout@v3
+        with:
+          repository: KEA-ReNov8/Befly-Minifest
+          path: manifest-repo
+          token: ${{ secrets.PAT }}
+
+      - name: Bump image tag in consult-service deployment
+        run: |
+          cd manifest-repo
+          IMAGE=${{ secrets.DOCKER_USERNAME }}/befly-ai:${{ steps.vars.outputs.sha }}
+          # apps/consult-service/deployment.yaml 의 image 필드만 교체
+          yq eval -i ".spec.template.spec.containers[0].image = \"${IMAGE}\"" apps/consult-service/deployment.yaml
+          git add apps/consult-service/deployment.yaml
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git commit -m "ci: bump consult-service image to ${{ steps.vars.outputs.sha }}"
+          git push origin main
