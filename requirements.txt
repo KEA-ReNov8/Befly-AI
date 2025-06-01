@@ -15,4 +15,3 @@ asyncio            # 비동기 처리
 httpx             # 비동기 HTTP 클라이언트
 motor
 langchain-google-genai
-tkinter
