@@ -158,7 +158,7 @@ async def delete_session(
     return None
 
 
-@router.get("/evaluate/result/{session_id}/",
+@router.get("/evaluate/result/{session_id}",
             response_model=ResponseModel,
             summary="채팅방 결과 조회",
             description="유저의 채팅 결과를 조회하는 API입니다.",
