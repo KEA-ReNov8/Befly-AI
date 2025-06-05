@@ -4,7 +4,7 @@ from typing import Any
 
 class ResponseModel(BaseModel):
     # Field(default_factory=...)를 사용하여 인스턴스 생성 시점에 현재 시각이 할당되도록 합니다.
-    time: datetime.datetime = Field(
+    timestamp: datetime.datetime = Field(
         default_factory=datetime.datetime.now,
         description="응답이 생성된 시각"
     )
