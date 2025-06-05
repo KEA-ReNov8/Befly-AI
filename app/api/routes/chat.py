@@ -156,3 +156,24 @@ async def delete_session(
             message="채팅이 삭제되었습니다."
         )
     return None
+
+
+@router.get("/evaluate/result/{session_id}/",
+            response_model=ResponseModel,
+            summary="채팅방 결과 조회",
+            description="유저의 채팅 결과를 조회하는 API입니다.",
+            )
+async def chat_list(
+        request: Request,
+        session_id: Annotated[str, Path(
+            description="종료된 상담을 조회하는 API입니다.",
+            example="10-73cbf3c058274f138913c43c40be19f0"
+        )]
+):
+    user_id = request.headers.get("X-USER-ID")
+    model= await ChatService.get_evaluation_result(session_id, user_id)
+    return ResponseModel(
+        code="COMMON200",
+        message="채팅 기록 반환에 성공했습니다.",
+        result = model
+    )

@@ -1,7 +1,8 @@
+import datetime
 from typing import Optional, List
 
-from app.core.config import settings
 from app.Exception.exceptions import CustomException
+from app.core.config import settings
 from app.database.CustomMongoChat import CustomMongoDBChatMessageHistory
 from app.database.MongoDB import get_db
 from app.prompt.counselorAI import chain_with_history
@@ -129,6 +130,7 @@ class ChatService:
                 config=config,
             )
             try:
+                print(response)
                 block = parse_json_block(response)
                 result = await update_after_keyword_and_change_status(session_id, block)
                 if result == "OK":
@@ -161,9 +163,21 @@ class ChatService:
             raise CustomException(500, "CHAT002", "서버 내부 오류입니다.")
 
 
+    @staticmethod
+    async def get_evaluation_result(session_id: str, user_id:str):
+        await SessionManager.validate_session(session_id, user_id, status=False)
 
+        info = await ChatRepository.find_session_info(session_id, False)
+        evaluation_result = {
+            "suggest_comment": info.get("suggest_comment"),
+            "total_comment": info.get("total_comment"),
+            "session_id": info.get("session_id"),
+            "chat_title": info.get("chat_title"),
+            "category": info.get("category"),
+            "after_keyword": info.get("after_keyword")
+        }
 
-
+        return evaluation_result
 
 
 
@@ -178,10 +192,12 @@ def parse_json_block(response_text: str) -> dict:
 
 async def update_after_keyword_and_change_status(session_id: str, data_dict: dict):
     try:
-        analytics_data = data_dict.get('analytics', [])
+        analytics_emotion = data_dict.get('analytics', [])
+        total_comment_data = data_dict.get('totalComment', {})
+        suggest_data = data_dict.get('suggest', {})
 
         keywords_to_add = []
-        for item in analytics_data:
+        for item in analytics_emotion:
             keyword_entry = {
                 "emotion": item.get('emotion'),
                 "score": item.get('score'),
@@ -189,11 +205,22 @@ async def update_after_keyword_and_change_status(session_id: str, data_dict: dic
             }
             keywords_to_add.append(keyword_entry)
 
+
+
         db = get_db()
         collection = db[settings.MONGODB_COLLECTION]
         query = {"session_id": session_id}
-        update = {"$push": {"after_keyword": {"$each": keywords_to_add}}, "$set": {"worry_state": False}}
-        result = await collection.update_one(query, update)
+        update_fields = {
+            "$push": {"after_keyword": {"$each": keywords_to_add}}, # 감정 분석 결과는 after_keyword 배열에 추가
+            "$set": {
+                "worry_state": False,
+                "total_comment": total_comment_data.get('comment'),  # totalComment의 comment를 'total_comment' 필드에 저장
+                "suggest_comment": suggest_data.get('comment'),      # suggest의 comment를 'suggest_comment' 필드에 저장
+                "last_updated": datetime.datetime.now()              # 마지막 업데이트 시각 기록 (옵션)
+            }
+        }
+        result = await collection.update_one(query, update_fields)
+
         if result.modified_count > 0 or result.upserted_id is not None:
             return "OK"
         return None
