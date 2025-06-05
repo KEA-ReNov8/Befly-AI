@@ -102,6 +102,23 @@ class ChatService:
 
         return chat_list
 
+    async def get_all_chat(user_id: str):
+        chat_list = await ChatRepository.get_all_chat(user_id)
+        all_chat = []
+
+        for chat in chat_list:
+            if chat:
+                all_chat.append({
+                    "session_id": chat.get("session_id"),
+                    "chat_title": chat.get("chat_title"),
+                    "created_at": chat.get("created_at"),
+                    "last_message": chat.get("content", ""),
+                    "category": chat.get("category"),
+                    "status": chat.get("worry_state")
+                })
+        return all_chat
+
+
     @staticmethod
     async def evaluate_user(session_id: str, user_id: str):
         try:
@@ -183,3 +200,5 @@ async def update_after_keyword_and_change_status(session_id: str, data_dict: dic
     except Exception as e:
         print(e)
         raise CustomException(500, "CHAT002", "채팅 세션 업데이트 중 오류가 발생했습니다.")
+
+

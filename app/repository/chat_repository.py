@@ -1,5 +1,7 @@
 from typing import Optional
 
+from motor.motor_asyncio import AsyncIOMotorCursor
+
 from app.database.MongoDB import get_db
 from app.core.config import settings
 
@@ -14,7 +16,7 @@ class ChatRepository:
         return await db[settings.MONGODB_COLLECTION].distinct("session_id", query)
 
     @staticmethod
-    async def find_session_info(session_id: str, status_field: Optional[bool] = None):
+    async def find_session_info(session_id: str, status_field):
         db = get_db()
         query = {"session_id": session_id}
 
@@ -26,3 +28,12 @@ class ChatRepository:
             query,
             sort=[("created_at", -1)]
         )
+
+    @staticmethod
+    async def get_all_chat(user_id: str):
+        db = get_db()
+        query = {"user_id": user_id}
+        cursor: AsyncIOMotorCursor = db[settings.MONGODB_COLLECTION].find(query, sort=[("created_at", -1)])
+        chat_docs = await cursor.to_list(length=None)
+        print(f"Found {len(chat_docs)} chats for user_id: {user_id}")
+        return chat_docs

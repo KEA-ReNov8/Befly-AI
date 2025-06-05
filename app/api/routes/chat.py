@@ -66,10 +66,28 @@ async def chat_history(
 ):
     headers = request.headers
     user_id = headers.get("X-USER-ID")
+    print("user_id", user_id)
     model = await ChatService.get_chat_history(session_id, user_id)
     return ResponseModel(
         code = "common200",
         message=" 채팅 기록 반환에 성공했습니다.",
+        result = model
+    )
+
+
+@router.get("/list/all",
+            response_model=ResponseModel,
+            summary="채팅방 목록 전체 조회",
+            description="유저의 채팅 목록을 조건 없이 모두 조회합니다."
+            )
+async def list_all(
+        request: Request,
+):
+    user_id = request.headers.get("X-USER-ID")
+    model = await ChatService.get_all_chat(user_id)
+    return ResponseModel(
+        code="COMMON200",
+        message="모든 채팅 목록입니다.",
         result = model
     )
 
@@ -108,6 +126,7 @@ async def evaluate_user(
     request: Request
 ):
     user_id = request.headers.get("X-USER-ID")
+    print(user_id)
     model = await ChatService.evaluate_user(session_id, user_id)
     return ResponseModel(
         code="COMMON200",
