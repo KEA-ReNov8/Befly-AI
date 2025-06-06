@@ -133,7 +133,7 @@ async def evaluate_user(
         message="평가가 완료되었습니다.",
         result = model
     )
-@router.delete("/{status_field}/{session_id}/",
+@router.delete("/{status_field}/{session_id}",
                response_model=ResponseModel,
                summary="채팅 삭제",
                description="해당 채팅방을 삭제합니다."
