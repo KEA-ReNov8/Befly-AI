@@ -165,7 +165,7 @@ class ChatService:
 
     @staticmethod
     async def get_evaluation_result(session_id: str, user_id:str):
-        await SessionManager.validate_session(session_id, user_id, status=False)
+        # await SessionManager.validate_session(session_id, user_id, status=False)
 
         info = await ChatRepository.find_session_info(session_id, False)
         evaluation_result = {
